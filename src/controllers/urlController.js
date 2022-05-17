@@ -8,24 +8,26 @@ const createUrl = async (req, res) => {
         const longUrl = req.body.longUrl;
         const baseUrl = 'http:localhost:3000'
         if(!validUrl.isUri(baseUrl)){
-            return res.status(401).json("Invalid baseUrl");
+            return res.status(401).send({status: false, message: "Invalid baseUrl"});
         }
     
-        const urlCode = shortid.generate();
+        let urlCode = shortid.generate();
     
         if(validUrl.isUri(longUrl)){
     
-                let url = await urlModel.findOne({longUrl : longUrl});
+                let url = await urlModel.findOne({longUrl : longUrl}).select({_id: 0, __v: 0});
+                // if url exist and return the respose
                 if(url){
-                    return res.status(200).send(url);
+                    return res.status(200).send({data:url});
                 }else{
     
-                    const shortUrl = baseUrl + "/" + urlCode;
+                    // join the generated urlcode to the baseurl
+                    let shortUrl = baseUrl + "/" + urlCode;
                     url  = await urlModel.create({longUrl, shortUrl, urlCode});
-                    return res.status(201).send(url);
+                    return res.status(201).send({data:url});
                 }
         }else{
-            res.status(400).send("Invalid longUrl");
+           return res.status(400).send({status: false, message: "Invalid longUrl"});
         }    
 
     }catch(err){
