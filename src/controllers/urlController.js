@@ -41,9 +41,7 @@ const redisClient = redis.createClient(
         if(validUrl.isUri(data.longUrl)){
     
                 let getUrl = await GET_ASYNC(`${data.longUrl}`)
-                //console.log("1-->", getUrl)
                 let url = JSON.parse(getUrl)
-                //console.log("2-->", url)
                 if(url){
                     return res.status(200).send({status: true, message: "Success",data: url});
                 }else{
@@ -55,9 +53,8 @@ const redisClient = redis.createClient(
                     data.urlCode = urlCode
                     data.shortUrl = shortUrl
 
-                    await urlModel.create(data)
-                    let responseData  = await urlModel.findOne({urlCode:urlCode}).select({_id:0, __v:0});
-                    //console.log("3---->",responseData)
+                    url = await urlModel.create(data)
+                    let responseData  = await urlModel.findOne({urlCode:urlCode}).select({_id:0, __v:0,createdAt: 0, updatedAt: 0 });
                     await SET_ASYNC(`${data.longUrl}`, JSON.stringify(responseData))
                     return res.status(201).send({status: true, message: "URL create successfully",data:responseData});
 
@@ -76,7 +73,6 @@ const getUrl = async (req, res) => {
 
     try{
     let cacheData = await GET_ASYNC(`${req.params.urlCode}`)
-    //console.log(cacheData)
     let url = JSON.parse(cacheData)
     if(url){
          return res.status(307).redirect(url.longUrl)
@@ -90,8 +86,8 @@ const getUrl = async (req, res) => {
   }catch(err){
          return res.status(500).send({status: false, Error: err.message})
      }
-}
-
+    }
+    
 module.exports = {createUrl, getUrl}
 
 
