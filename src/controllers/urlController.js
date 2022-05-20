@@ -31,11 +31,17 @@ const redisClient = redis.createClient(
 
         const data = req.body;
 
+        //take baseurl
+        const baseUrl = 'http:localhost:3000'
+
         //valid data
         if(Object.keys(data).length == 0) return res.status(400).send({status: false, message: "Invalid URL Please Enter valid details"}) 
 
         //check longurl is present or not
         if(!data.longUrl) return res.status(400).send({status: false, message: "longUrl is required"})
+
+        //validdate baseurl
+        if(!validUrl.isUri(baseUrl)) return res.status(400).send({status: false, message: "baseurl not found"}) 
 
         //checking for a valid url data in request body
         if(validUrl.isUri(data.longUrl)){
@@ -49,13 +55,12 @@ const redisClient = redis.createClient(
                     return res.status(200).send({status: true, message: "Success",data: url});
                 }else{
     
-                    //take baseurl
-                    const baseUrl = 'http:localhost:3000'
                     //generating the urlcode
                     let urlCode = shortid.generate().toLowerCase();
                     
                     //creating a shorturl
                     let shortUrl = baseUrl + "/" + urlCode;
+                    if(!shortUrl) return res.status(400).send({status: false, message: "shorturl is required"})
 
                     data.urlCode = urlCode
                     data.shortUrl = shortUrl
