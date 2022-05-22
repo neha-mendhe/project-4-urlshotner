@@ -89,7 +89,7 @@ const getUrl = async (req, res) => {
     try{
      //getting the data from cache if present
     let cacheData = await GET_ASYNC(`${req.params.urlCode}`)
-
+       console.log("cacheData=" , cacheData)
     //converting from string to JSON
     let url = JSON.parse(cacheData)
     if(url){
